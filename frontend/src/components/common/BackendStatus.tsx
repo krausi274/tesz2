@@ -12,7 +12,7 @@ const BackendStatus: React.FC<BackendStatusProps> = ({ onRetry }) => {
 
   if (loading) {
     return (
-      <Alert severity="info" sx={{ mb: 2 }}>
+      <Alert severity="info\" sx={{ mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <CircularProgress size={20} />
           <span>Connecting to backend...</span>

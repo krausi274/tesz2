@@ -378,7 +378,7 @@ const HomePage: React.FC = () => {
           <Alert 
             severity="warning"
             action={
-              <Button color="inherit" size="small" onClick={refetch}>
+              <Button color="inherit\" size="small\" onClick={refetch}>
                 Retry
               </Button>
             }
