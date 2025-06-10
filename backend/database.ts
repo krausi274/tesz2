@@ -7,11 +7,14 @@ import { Verifizierung } from "./entities/verifizierung";
 import { Interessen_Hobby } from "./entities/interessen_hobby";
 import { Chat } from "./entities/chat";
 import { Message } from "./entities/message";
+import path from "path";
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
-  database: "../database/travelmate_db.sqlite",
+  database: path.join(__dirname, "..", "database", "travelmate_db.sqlite"),
   synchronize: true,
-  logging: true,
+  logging: false, // Set to true for SQL debugging
   entities: [Person, Adresse, Reiseziel, Meta_Daten, Verifizierung, Interessen_Hobby, Chat, Message],
+  migrations: [],
+  subscribers: [],
 });

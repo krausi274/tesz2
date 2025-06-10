@@ -19,6 +19,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Map, Users, Globe, MessageCircle, Shield, Camera } from 'lucide-react';
 import { destinations } from '../data/mockData';
 import ProfileCard from '../components/user/ProfileCard';
+import BackendStatus from '../components/common/BackendStatus';
 import { useUsers } from '../hooks/useApi';
 
 const HomePage: React.FC = () => {
@@ -26,7 +27,7 @@ const HomePage: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   // Fetch real users from backend
-  const { users, loading, error } = useUsers();
+  const { users, loading, error, refetch } = useUsers();
   
   // Featured users (sample data from backend)
   const featuredUsers = users.slice(0, 3).map(user => ({
@@ -66,6 +67,11 @@ const HomePage: React.FC = () => {
 
   return (
     <Box>
+      {/* Backend Status */}
+      <Container maxWidth="lg" sx={{ pt: 2 }}>
+        <BackendStatus onRetry={refetch} />
+      </Container>
+
       {/* Hero Section */}
       <Box 
         sx={{ 
@@ -369,8 +375,15 @@ const HomePage: React.FC = () => {
       {/* Error state */}
       {error && (
         <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
-          <Alert severity="info">
-            Unable to load travelers at the moment. Please try again later.
+          <Alert 
+            severity="warning"
+            action={
+              <Button color="inherit" size="small" onClick={refetch}>
+                Retry
+              </Button>
+            }
+          >
+            {error}
           </Alert>
         </Container>
       )}

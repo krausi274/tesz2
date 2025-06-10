@@ -3,6 +3,30 @@ import { apiService, BackendPerson } from '../services/api';
 import { transformBackendPersonToUser } from '../utils/dataTransformers';
 import { User } from '../types/user';
 
+// Hook for testing backend connection
+export function useBackendConnection() {
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        setLoading(true);
+        const connected = await apiService.testConnection();
+        setIsConnected(connected);
+      } catch (error) {
+        setIsConnected(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    testConnection();
+  }, []);
+
+  return { isConnected, loading };
+}
+
 // Hook for fetching all users
 export function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
@@ -13,12 +37,20 @@ export function useUsers() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
+        // Test connection first
+        const isConnected = await apiService.testConnection();
+        if (!isConnected) {
+          throw new Error('Backend server is not responding. Please ensure the backend is running on http://localhost:3000');
+        }
+
         const backendPersons = await apiService.getAllPersons();
         const transformedUsers = backendPersons.map(transformBackendPersonToUser);
         setUsers(transformedUsers);
-        setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch users');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users';
+        setError(errorMessage);
         console.error('Error fetching users:', err);
       } finally {
         setLoading(false);
@@ -31,12 +63,14 @@ export function useUsers() {
   const refetch = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const backendPersons = await apiService.getAllPersons();
       const transformedUsers = backendPersons.map(transformBackendPersonToUser);
       setUsers(transformedUsers);
-      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch users');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -60,12 +94,14 @@ export function useUserDetails(userId: string | null) {
     const fetchUserDetails = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
         const backendPerson = await apiService.getPersonDetails(userId);
         const transformedUser = transformBackendPersonToUser(backendPerson);
         setUser(transformedUser);
-        setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch user details');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch user details';
+        setError(errorMessage);
         console.error('Error fetching user details:', err);
       } finally {
         setLoading(false);
@@ -87,6 +123,7 @@ export function useCreateUser() {
     try {
       setLoading(true);
       setError(null);
+      
       const result = await apiService.createPerson(userData);
       return result;
     } catch (err) {

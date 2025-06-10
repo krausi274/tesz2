@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Types for backend data structures
 export interface BackendPerson {
@@ -86,6 +86,8 @@ class ApiService {
     const url = `${API_BASE_URL}${endpoint}`;
     
     try {
+      console.log(`🌐 API Request: ${options?.method || 'GET'} ${url}`);
+      
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -94,14 +96,37 @@ class ApiService {
         ...options,
       });
 
+      console.log(`📡 API Response: ${response.status} ${response.statusText}`);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`❌ API Error: ${response.status} - ${errorText}`);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log(`✅ API Success:`, data);
+      return data;
     } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error);
+      console.error(`❌ API request failed for ${endpoint}:`, error);
+      
+      // Check if it's a network error
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error(`Unable to connect to server at ${API_BASE_URL}. Please ensure the backend is running.`);
+      }
+      
       throw error;
+    }
+  }
+
+  // Test connection to backend
+  async testConnection(): Promise<boolean> {
+    try {
+      await this.request<{ status: string }>('/health');
+      return true;
+    } catch (error) {
+      console.error('❌ Backend connection test failed:', error);
+      return false;
     }
   }
 
