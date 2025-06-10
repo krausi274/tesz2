@@ -1,0 +1,19 @@
+{
+  "name": "travelmate",
+  "version": "1.0.0",
+  "description": "This is a collaborative project for the ebusiness module in the 6th semester at Hochschule Karlsruhe",
+  "main": "index.js",
+  "workspaces": [
+    "./backend",
+    "./frontend"
+  ],
+  "scripts": {
+    "install-all": "npm install",
+    "start-backend": "npm start --workspace=backend",
+    "start-frontend": "npm start --workspace=frontend"
+  },
+  
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
